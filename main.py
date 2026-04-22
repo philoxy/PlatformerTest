@@ -3,23 +3,17 @@ from pygame.locals import *
 import sys
 # import antigravity
 
-# to make a side scroller just add a variable which offsets how the platforms are displayed on their x and y
-# then display the platforms with that variables added to the x and y
-# maybe make each level place the platforms themselves rather than making it built into the main
-# like, make it run python code (somehow??)
-# to make camera movement make another update function for the platforms dflksafj
-
-# ok, what if instead of the player moving the platforms moved
-# ill do it later cuz im lazy
-
+# to do list:
+# load levels somehow
+# vertical camera movement
 
 pygame.init()
 vec = pygame.math.Vector2
 
 HEIGHT = 480
 WIDTH = 640
-ACC = 0.2 # acceleration
-FRIC = -0.12 # friction
+# ACC = 0.2
+FRIC = -0.12
 FPS = 60
 global jumps
 jumps = 2 # this is going to be horrible later on
@@ -32,14 +26,10 @@ gravity = 6
 global camerabounds
 camerabounds = 300
 
-
 FramePerSec = pygame.time.Clock()
 
 displaysurface = pygame.display.set_mode((WIDTH, HEIGHT), vsync=1)
 pygame.display.set_caption("Platformer Test")
-
-# displaysurface.blit(imagey, (self.pos.x, self.pos.y))
-# pygame.display.flip()
 
 class Player(pygame.sprite.Sprite):
 	def __init__(self, image_path, position):
@@ -71,7 +61,6 @@ class Player(pygame.sprite.Sprite):
 			# ACC2 = ACC
 			move = 3
 
-		#if self.pos.x < camerabounds or self.pos.x > (WIDTH-camerabounds):
 		if camerabounds < self.pos.x < (WIDTH-camerabounds):
 			if pressed_keys[K_LEFT]:
 				self.pos.x -= move
@@ -156,6 +145,10 @@ class platformsprite(pygame.sprite.Sprite):
 		self.rect.midtop = self.pos
 
 P1 = Player("assets/player.png", (200, 100))
+
+# this will be removed later when i get worlds to load
+# also fix them all spawning in the same place
+
 PT1 = platforms("assets/platform-collision.png", ((100+offsetX), 400))
 PT2 = platforms("assets/platform-collision.png", ((64+offsetX), 350))
 PT1S = platformsprite("assets/platform.png", ((0+offsetX), 400))
@@ -186,19 +179,12 @@ while True:
 			if event.key == pygame.K_SPACE:
 				P1.jump()
 
-	# for entity in all_sprites:
-	# 	displaysurface.blit(entity.surf, entity.rect)
-
-	#offsetX = WIDTH-P1.pos.x
-	#offsetY = HEIGHT-P1.pos.y
-
 	pygame.display.update()
 	FramePerSec.tick(FPS)
 
 	P1.move()
 	P1.update()
 	platforms.update()
-	#print(offsetX)
 
 	if P1.pos.y > HEIGHT:
 		P1.pos.y = 0
