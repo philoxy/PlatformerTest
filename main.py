@@ -29,6 +29,8 @@ global offsetY
 offsetY = 0
 move = 3
 gravity = 6
+global camerabounds
+camerabounds = 300
 
 
 FramePerSec = pygame.time.Clock()
@@ -56,6 +58,7 @@ class Player(pygame.sprite.Sprite):
 	def move(self):
 		global move
 		global offsetX
+		global camerabounds
 
 		self.acc = vec(0,0.3)
 
@@ -68,26 +71,33 @@ class Player(pygame.sprite.Sprite):
 			# ACC2 = ACC
 			move = 3
 
-		if pressed_keys[K_LEFT]:
-			# self.acc.x = 0
-			# self.acc.x = -ACC
-			# self.pos.x -= move
-			offsetX -= move
+		#if self.pos.x < camerabounds or self.pos.x > (WIDTH-camerabounds):
+		if camerabounds < self.pos.x < (WIDTH-camerabounds):
+			if pressed_keys[K_LEFT]:
+				self.pos.x -= move
+			if pressed_keys[K_RIGHT]:
+				self.pos.x += move
+		else: 
+			if pressed_keys[K_LEFT]:
+				# self.acc.x = 0
+				# self.acc.x = -ACC
+				offsetX += move
+				self.pos.x -= move
+			if pressed_keys[K_RIGHT]:
+				offsetX -= move
+				self.pos.x += move
 
-		if pressed_keys[K_RIGHT]:
-			# self.acc.x = 0
-			# self.acc.x = -ACC
-			# self.pos.x += move
-			offsetX += move
+
+
 
 		self.acc.x += self.vel.x * FRIC
 		self.vel += self.acc
 		self.pos += self.vel + 0.5 * self.acc
 
-		if self.pos.x > WIDTH-15:
-			self.pos.x = WIDTH-15
-		if self.pos.x < 15:
-			self.pos.x = 15
+		if self.pos.x > WIDTH-camerabounds:
+			self.pos.x = WIDTH-camerabounds
+		if self.pos.x < camerabounds:
+			self.pos.x = camerabounds
 
 		self.rect.midbottom = self.pos
 		
@@ -145,8 +155,8 @@ class platformsprite(pygame.sprite.Sprite):
 
 		self.rect.midtop = self.pos
 
-P1 = Player("assets/player.png", (30, 30))
-PT1 = platforms("assets/platform-collision.png", ((0+offsetX), 400))
+P1 = Player("assets/player.png", (200, 100))
+PT1 = platforms("assets/platform-collision.png", ((100+offsetX), 400))
 PT2 = platforms("assets/platform-collision.png", ((64+offsetX), 350))
 PT1S = platformsprite("assets/platform.png", ((0+offsetX), 400))
 PT2S = platformsprite("assets/platform.png", ((64+offsetX), 350))
@@ -164,6 +174,7 @@ all_sprites.add(P1)
 all_sprites.add(PT1S)
 all_sprites.add(PT2S)
 
+# main loop
 while True:
 
 	for event in pygame.event.get():
@@ -187,7 +198,7 @@ while True:
 	P1.move()
 	P1.update()
 	platforms.update()
-	print(offsetX)
+	#print(offsetX)
 
 	if P1.pos.y > HEIGHT:
 		P1.pos.y = 0
