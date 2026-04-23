@@ -112,7 +112,7 @@ class Player(pygame.sprite.Sprite):
 				self.vel.y = -gravity
 			jumps -= 1
 
-class platforms(pygame.sprite.Sprite):
+class Platform(pygame.sprite.Sprite):
 	def __init__(self, image_path, position):
 		super().__init__()
 		self.surf = pygame.Surface((WIDTH, 20))
@@ -128,7 +128,7 @@ class platforms(pygame.sprite.Sprite):
 
 		self.rect.midbottom = self.pos
 
-class platformsprite(pygame.sprite.Sprite):
+class PlatformSprite(pygame.sprite.Sprite):
 	def __init__(self, image_path, position):
 		super().__init__()
 		self.surf = pygame.Surface((WIDTH, 20))
@@ -157,24 +157,25 @@ for i in range(len(level_content)):
 	level_objtype = level_content[level_objs[i]]['objtype']
 	level_pos = (level_content[level_objs[i]]['posx'], level_content[level_objs[i]]['posy'])
 	if level_objtype == "platform":
-		level_objs[i] = platforms(level_sprite, level_pos)
+		level_objs[i] = Platform(level_sprite, level_pos)
 	elif level_objtype == "sprite":
-		level_objs[i] = platformsprite(level_sprite, level_pos)
+		level_objs[i] = PlatformSprite(level_sprite, level_pos)
 
 	print(level_pos)
 
 # these MUST stay after the sprite definitions to avoid bugs
 platforms = pygame.sprite.Group()
-platformsprite = pygame.sprite.Group()
+platformSprites = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(P1)
 
 for i in range(len(level_content)):
-	if level_objtype == "platform":
+	objtype = level_content[list(level_content.keys())[i]]['objtype']
+	if objtype == "platform":
 		platforms.add(level_objs[i])
 		all_sprites.add(level_objs[i])
-	elif level_objtype == "sprite":
-		platformsprite.add(level_objs[i])
+	elif objtype == "sprite":
+		platformSprites.add(level_objs[i])
 		all_sprites.add(level_objs[i])
 	print(level_objs[i].pos)
 
