@@ -1,6 +1,6 @@
 import pygame
 from pygame.locals import *
-import sys
+import sys, json
 # import antigravity
 
 # to do list:
@@ -92,7 +92,7 @@ class Player(pygame.sprite.Sprite):
 		
 	
 	def update(self):
-		hits = pygame.sprite.spritecollide(P1 , platforms, False)
+		hits = pygame.sprite.spritecollide(self, platforms, False)
 		if P1.vel.y > 0:
 			if hits:
 				self.pos.y = hits[0].rect.top + 1
@@ -121,7 +121,7 @@ class platforms(pygame.sprite.Sprite):
 
 		self.image = pygame.image.load(image_path)
 		self.rect = self.image.get_rect(topleft=position)
-		self.pos = vec((10, 385))
+		self.pos = vec(position)
 
 	def update(self):
 		self.pos.x = offsetX
@@ -137,7 +137,7 @@ class platformsprite(pygame.sprite.Sprite):
 
 		self.image = pygame.image.load(image_path)
 		self.rect = self.image.get_rect(topleft=position)
-		self.pos = vec((10, 385))
+		self.pos = vec(position)
 
 	def update(self):
 		self.pos.x = offsetX
@@ -146,28 +146,40 @@ class platformsprite(pygame.sprite.Sprite):
 
 P1 = Player("assets/player.png", (200, 100))
 
-# this will be removed later when i get worlds to load
-# also fix them all spawning in the same place
+# making level objects
 
-PT1 = platforms("assets/platform-collision.png", ((100+offsetX), 400))
-PT2 = platforms("assets/platform-collision.png", ((64+offsetX), 350))
-PT1S = platformsprite("assets/platform.png", ((0+offsetX), 400))
-PT2S = platformsprite("assets/platform.png", ((64+offsetX), 350))
+with open("levels/level1.json", "r") as level:
+	level_content = json.load(level)
+	level_objs = list(level_content.keys())
 
+for i in range(len(level_content)):
+	level_sprite = level_content[level_objs[i]]['sprite']
+	level_objtype = level_content[level_objs[i]]['objtype']
+	level_pos = (level_content[level_objs[i]]['posx'], level_content[level_objs[i]]['posy'])
+	if level_objtype == "platform":
+		level_objs[i] = platforms(level_sprite, level_pos)
+	elif level_objtype == "sprite":
+		level_objs[i] = platformsprite(level_sprite, level_pos)
+
+	print(level_pos)
+
+# these MUST stay after the sprite definitions to avoid bugs
 platforms = pygame.sprite.Group()
-platforms.add(PT1)
-platforms.add(PT2)
-platformsprite.add(PT1S)
-platformsprite.add(PT2S)
-
+platformsprite = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
-all_sprites.add(PT1)
-all_sprites.add(PT2)
 all_sprites.add(P1)
-all_sprites.add(PT1S)
-all_sprites.add(PT2S)
 
-# main loop
+for i in range(len(level_content)):
+	if level_objtype == "platform":
+		platforms.add(level_objs[i])
+		all_sprites.add(level_objs[i])
+	elif level_objtype == "sprite":
+		platformsprite.add(level_objs[i])
+		all_sprites.add(level_objs[i])
+	print(level_objs[i].pos)
+
+	# main loop
+
 while True:
 
 	for event in pygame.event.get():
@@ -189,7 +201,7 @@ while True:
 	if P1.pos.y > HEIGHT:
 		P1.pos.y = 0
 
-	displaysurface.fill("#000000")
+	displaysurface.fill("#aabbcc")
 	all_sprites.update()
 	all_sprites.draw(displaysurface)
 	pygame.display.flip()

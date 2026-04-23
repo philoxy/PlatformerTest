@@ -16,3 +16,7 @@ this is due in june how the hell am i gonna finish this
 * pygame
 * sys (for a single quit command...)
 * ~~antigravity~~
+
+## Installation
+1. Run `git clone https://github.com/philoxy/PlatformerTest.git` to get all the game files in your current working directory
+2. Go into the "PlatformerTest" folder and then run `python3 main.py` to run the game. The game should then start (as long as your <a href="https://xkcd.com/1987/">python environment</a> isnt messed up)

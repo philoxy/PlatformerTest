@@ -1,0 +1,29 @@
+{    
+    "PT0":{
+        "posx":100,
+        "posy":400,
+        "sprite":"assets/platform.png",
+        "objtype":"platform"
+    },
+
+    "PT0S":{
+        "posx":100,
+        "posy":400,
+        "sprite":"assets/platform-collision.png",
+        "objtype":"sprite"
+    },
+    
+    "PT1":{
+        "posx":64,
+        "posy":350,
+        "sprite":"assets/platform.png",
+        "objtype":"platform"
+    },
+
+    "PT1S":{
+        "posx":64,
+        "posy":350,
+        "sprite":"assets/platform-collision.png",
+        "objtype":"sprite"
+    }
+}
