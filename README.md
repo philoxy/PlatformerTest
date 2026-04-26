@@ -14,9 +14,10 @@ this is due in june how the hell am i gonna finish this
 ## Python Depencencies
 
 * pygame
-* sys (for a single quit command...)
+* json
 * ~~antigravity~~
 
 ## Installation
-1. Run `git clone https://github.com/philoxy/PlatformerTest.git` to get all the game files in your current working directory
-2. Go into the "PlatformerTest" folder and then run `python3 main.py` to run the game. The game should then start (as long as your <a href="https://xkcd.com/1987/">python environment</a> isnt messed up)
+1. Get python (python 3.13 as 3.14 gives a weird error about... BMPs???)
+2. Run `git clone https://github.com/philoxy/PlatformerTest.git` to get all the game files in your current working directory
+3. Go into the "PlatformerTest" folder and then run `python3 main.py` to run the game. The game should then start (as long as your <a href="https://xkcd.com/1987/">python environment</a> isnt messed up)

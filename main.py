@@ -4,8 +4,10 @@ import sys, json
 # import antigravity
 
 # to do list:
-# load levels somehow
-# vertical camera movement
+# redo camera movement cuz its broken
+
+
+# the tiles make me want to make the 1st level azure lake zone
 
 pygame.init()
 vec = pygame.math.Vector2
@@ -16,39 +18,51 @@ WIDTH = 640
 FRIC = -0.12
 FPS = 60
 global jumps
-jumps = 2 # this is going to be horrible later on
+jumps = 2
 global offsetX
 offsetX = 0
 global offsetY
 offsetY = 0
 move = 3
-gravity = 6
+gravity = 0.001
 global camerabounds
 camerabounds = 300
+global direction
+direction = 1
+# 0 = left
+# 1 = right
+global hits
+hits = False
 
 FramePerSec = pygame.time.Clock()
 
-displaysurface = pygame.display.set_mode((WIDTH, HEIGHT), vsync=1)
-pygame.display.set_caption("Platformer Test")
+displaysurface = pygame.display.set_mode((WIDTH, HEIGHT), vsync=True)
+pygame.display.set_caption("Platformer Test")	
+icon = pygame.image.load("assets/player.png")
+pygame.display.set_icon(icon)
+# replace direction system because animations
+player = pygame.image.load("assets/player.png")
+flipped_player = pygame.transform.flip(player, True, False)
 
 class Player(pygame.sprite.Sprite):
 	def __init__(self, image_path, position):
 		super().__init__()
-		self.surf = pygame.Surface((50, 50))
-		self.surf.fill((128,255,40))
+		self.surf = pygame.Surface((32,32))
+		#self.surf.fill((128,255,40))
 		self.rect = self.surf.get_rect()
 
 		self.image = pygame.image.load(image_path)
 		self.rect = self.image.get_rect(topleft=position)
 	
-		self.pos = vec((10, 385))
+		self.pos = vec(position)
 		self.vel = vec(0,0)
-		self.acc = vec(0,0)
 
 	def move(self):
 		global move
 		global offsetX
 		global camerabounds
+		global direction
+		global gravity
 
 		self.acc = vec(0,0.3)
 
@@ -64,23 +78,27 @@ class Player(pygame.sprite.Sprite):
 		if camerabounds < self.pos.x < (WIDTH-camerabounds):
 			if pressed_keys[K_LEFT]:
 				self.pos.x -= move
+				direction = 0
 			if pressed_keys[K_RIGHT]:
 				self.pos.x += move
+				direction = 1
 		else: 
 			if pressed_keys[K_LEFT]:
 				# self.acc.x = 0
 				# self.acc.x = -ACC
 				offsetX += move
 				self.pos.x -= move
+				direction = 0
 			if pressed_keys[K_RIGHT]:
 				offsetX -= move
 				self.pos.x += move
+				direction = 1
 
 
 
 
 		self.acc.x += self.vel.x * FRIC
-		self.vel += self.acc
+		self.vel += self.acc*gravity
 		self.pos += self.vel + 0.5 * self.acc
 
 		if self.pos.x > WIDTH-camerabounds:
@@ -92,78 +110,137 @@ class Player(pygame.sprite.Sprite):
 		
 	
 	def update(self):
-		hits = pygame.sprite.spritecollide(self, platforms, False)
-		if P1.vel.y > 0:
-			if hits:
-				self.pos.y = hits[0].rect.top + 1
-				self.vel.y = 0
+		global direction
+		#hits = pygame.sprite.spritecollide(self, platforms, False)
+		#if self.rect.bottom == platforms.rect.top:
+		#if self.vel.y > 0:
+			#if hits:
+				#if self.pos.y + 32 <= platforms.pos.y and platforms.pos.x + 64 > self.pos.x > platforms.pos.x - 32:
+				#self.pos.y = hits[0].rect.top + 1
+				#self.vel.y = 0
+		if direction == 0:
+			self.image = flipped_player
+
+		elif direction == 1:
+			self.image = player
 
 	def jump(self):
 		global jumps
 		global gravity
+		global hits
 
-		hits = pygame.sprite.spritecollide(self, platforms, False)
-		if hits:
+		#hits = pygame.sprite.spritecollide(self, platforms, False)
+		if hits or self.vel.y == 0:
 			jumps = 2
 		if jumps > 0:
 			if jumps == 2:
 				self.vel.y = -(gravity*1.5)
+				jumps = 1
 			elif jumps == 1:
 				self.vel.y = -gravity
-			jumps -= 1
+				jumps = 0
 
 class Platform(pygame.sprite.Sprite):
 	def __init__(self, image_path, position):
 		super().__init__()
-		self.surf = pygame.Surface((WIDTH, 20))
+		self.surf = pygame.Surface(position)
 		self.surf.fill((250,0,0))
-		self.rect = self.surf.get_rect(center = (WIDTH/2, HEIGHT - 10))
+		self.rect = self.surf.get_rect(topleft=position)
 
 		self.image = pygame.image.load(image_path)
 		self.rect = self.image.get_rect(topleft=position)
 		self.pos = vec(position)
 
 	def update(self):
-		self.pos.x = offsetX
+		global move
+		global hits
+		global saved_x
+		global saved_y
+		saved_x = P1.pos.x
+		saved_y = P1.pos.y
+		#self.pos.x += offsetX
 
-		self.rect.midbottom = self.pos
+		hits = self.rect.colliderect(P1.rect)
+
+		#self.rect.midbottom = self.pos
+		self.rect.midbottom = (self.pos.x + offsetX, self.pos.y)
+
+		if self.rect.colliderect(P1.rect):
+			#print(" ")
+			#print(direction)
+			#print(P1.rect.right)
+			#print(P1.rect.left)
+			#print(P1.rect.top)
+			#print(P1.rect.bottom)
+			#print(" ")
+			#print(self.rect.right)
+			#print(self.rect.left)
+			#print(self.rect.top)
+			#print(self.rect.bottom)
+			if direction == 0 and P1.rect.right == self.rect.left:
+				P1.pos.y = saved_y
+				P1.rect.right = self.rect.left - 1
+				P1.pos.x = P1.rect.right
+				P1.pos.y = saved_y
+				print("right collision")
+			if direction == 1 and P1.rect.left == self.rect.right:
+				P1.pos.y = saved_y
+				P1.rect.left = self.rect.right + 1
+				P1.pos.x = P1.rect.left
+				P1.pos.y = saved_y
+				print("left collision")
+			if P1.vel.y < 0 and P1.rect.top == self.rect.bottom:
+				P1.pos.x = saved_x
+				P1.rect.top = self.rect.bottom - 1
+				P1.pos.y = P1.rect.top
+				P1.vel.y = 0
+				P1.pos.x = saved_x
+				print("up collision")
+			if P1.vel.y > 0 and P1.rect.bottom == self.rect.top:
+				P1.pos.x = saved_x
+				P1.rect.bottom = self.rect.top + 1
+				P1.vel.y = 0
+				P1.pos.y = P1.rect.bottom
+				P1.pos.x = saved_x
+				print("down collision")
 
 class PlatformSprite(pygame.sprite.Sprite):
 	def __init__(self, image_path, position):
 		super().__init__()
-		self.surf = pygame.Surface((WIDTH, 20))
+		self.surf = pygame.Surface(position)
 		self.surf.fill((250,0,0))
-		self.rect = self.surf.get_rect(center = (WIDTH/2, HEIGHT - 10))
+		self.rect = self.surf.get_rect(topleft=position)
 
 		self.image = pygame.image.load(image_path)
 		self.rect = self.image.get_rect(topleft=position)
 		self.pos = vec(position)
 
 	def update(self):
-		self.pos.x = offsetX
+		#self.pos.x += offsetX
 
-		self.rect.midtop = self.pos
+		#self.rect.midtop = self.pos
+		self.rect.midbottom = (self.pos.x+offsetX, self.pos.y)
 
-P1 = Player("assets/player.png", (200, 100))
+P1 = Player("assets/player.png", (300, 200))
 
 # making level objects
 
 with open("levels/level1.json", "r") as level:
 	level_content = json.load(level)
-	level_objs = list(level_content.keys())
+	objs = list(level_content.keys())
 
 for i in range(len(level_content)):
-	level_sprite = level_content[level_objs[i]]['sprite']
-	level_objtype = level_content[level_objs[i]]['objtype']
-	level_pos = (level_content[level_objs[i]]['posx'], level_content[level_objs[i]]['posy'])
-	if level_objtype == "platform":
-		level_objs[i] = Platform(level_sprite, level_pos)
-	elif level_objtype == "sprite":
-		level_objs[i] = PlatformSprite(level_sprite, level_pos)
-
-	print(level_pos)
-
-# these MUST stay after the sprite definitions to avoid bugs
+	sprite = level_content[objs[i]]['sprite']
+	objtype = level_content[objs[i]]['objtype']
+	pos = (64*level_content[objs[i]]['posx'], 64*level_content[objs[i]]['posy'])
+	if objtype == "platform":
+		objs[i] = Platform(sprite, pos)
+	elif objtype == "sprite":
+		objs[i] = PlatformSprite(sprite, pos)
+	elif objtype == "player":
+		print("Player object, avoided")
+		#objs[i] = Player(sprite, pos)
+		
 platforms = pygame.sprite.Group()
 platformSprites = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
@@ -172,12 +249,14 @@ all_sprites.add(P1)
 for i in range(len(level_content)):
 	objtype = level_content[list(level_content.keys())[i]]['objtype']
 	if objtype == "platform":
-		platforms.add(level_objs[i])
-		all_sprites.add(level_objs[i])
+		platforms.add(objs[i])
 	elif objtype == "sprite":
-		platformSprites.add(level_objs[i])
-		all_sprites.add(level_objs[i])
-	print(level_objs[i].pos)
+		platformSprites.add(objs[i])
+	elif objtype == "player":
+		print("Player object, avoided")
+		Player.add(objs[i])
+		all_sprites.add(objs[i])
+	all_sprites.add(objs[i])
 
 	# main loop
 
@@ -198,11 +277,13 @@ while True:
 	P1.move()
 	P1.update()
 	platforms.update()
+	platformSprites.update()
 
 	if P1.pos.y > HEIGHT:
 		P1.pos.y = 0
+		P1.vel.y = 0
 
-	displaysurface.fill("#aabbcc")
+	displaysurface.fill("#aabbcc") #causes screen tearing
 	all_sprites.update()
 	all_sprites.draw(displaysurface)
 	pygame.display.flip()
