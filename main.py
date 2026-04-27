@@ -166,43 +166,35 @@ class Platform(pygame.sprite.Sprite):
 		self.rect.midbottom = (self.pos.x + offsetX, self.pos.y)
 
 		if self.rect.colliderect(P1.rect):
-			#print(" ")
-			#print(direction)
-			#print(P1.rect.right)
-			#print(P1.rect.left)
-			#print(P1.rect.top)
-			#print(P1.rect.bottom)
-			#print(" ")
-			#print(self.rect.right)
-			#print(self.rect.left)
-			#print(self.rect.top)
-			#print(self.rect.bottom)
-			if direction == 0 and P1.rect.right == self.rect.left:
-				P1.pos.y = saved_y
-				P1.rect.right = self.rect.left - 1
+
+			# Calculate overlap distances
+			dx_left = P1.rect.right - self.rect.left
+			dx_right = self.rect.right - P1.rect.left
+			dy_top = P1.rect.bottom - self.rect.top
+			dy_bottom = self.rect.bottom - P1.rect.top
+
+			# Find smallest overlap (collision side)
+			min_overlap = min(dx_left, dx_right, dy_top, dy_bottom)
+
+			# Horizontal collisions
+			if min_overlap == dx_left:
+				P1.rect.right = self.rect.left
 				P1.pos.x = P1.rect.right
-				P1.pos.y = saved_y
-				print("right collision")
-			if direction == 1 and P1.rect.left == self.rect.right:
-				P1.pos.y = saved_y
-				P1.rect.left = self.rect.right + 1
+
+			elif min_overlap == dx_right:
+				P1.rect.left = self.rect.right
 				P1.pos.x = P1.rect.left
-				P1.pos.y = saved_y
-				print("left collision")
-			if P1.vel.y < 0 and P1.rect.top == self.rect.bottom:
-				P1.pos.x = saved_x
-				P1.rect.top = self.rect.bottom - 1
+
+			# Vertical collisions
+			elif min_overlap == dy_top:
+				P1.rect.bottom = self.rect.top
+				P1.pos.y = P1.rect.bottom
+				P1.vel.y = 0
+
+			elif min_overlap == dy_bottom:
+				P1.rect.top = self.rect.bottom
 				P1.pos.y = P1.rect.top
 				P1.vel.y = 0
-				P1.pos.x = saved_x
-				print("up collision")
-			if P1.vel.y > 0 and P1.rect.bottom == self.rect.top:
-				P1.pos.x = saved_x
-				P1.rect.bottom = self.rect.top + 1
-				P1.vel.y = 0
-				P1.pos.y = P1.rect.bottom
-				P1.pos.x = saved_x
-				print("down collision")
 
 class PlatformSprite(pygame.sprite.Sprite):
 	def __init__(self, image_path, position):
