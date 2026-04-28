@@ -1,28 +1,63 @@
 {    
     "PT0S":{
-        "posx":0,
+        "posx":1,
         "posy":4,
         "sprite":"assets/platform.png",
         "objtype":"sprite"
     },
 
     "PT0":{
-        "posx":0,
+        "posx":1,
         "posy":5,
         "sprite":"assets/platform-collision.png",
         "objtype":"platform"
     },
     
     "PT1":{
-        "posx":1,
+        "posx":2,
         "posy":4,
         "sprite":"assets/platform.png",
         "objtype":"sprite"
     },
 
     "PT1S":{
-        "posx":1,
+        "posx":2,
         "posy":5,
+        "sprite":"assets/platform-collision.png",
+        "objtype":"platform"
+    },
+
+    "PT2":{
+        "posx":0,
+        "posy":7,
+        "sprite":"assets/platform-collision.png",
+        "objtype":"platform"
+    },
+
+    "PT3":{
+        "posx":1,
+        "posy":7,
+        "sprite":"assets/platform-collision.png",
+        "objtype":"platform"
+    },
+
+    "PT4":{
+        "posx":2,
+        "posy":7,
+        "sprite":"assets/platform-collision.png",
+        "objtype":"platform"
+    },
+
+    "PT5":{
+        "posx":3,
+        "posy":7,
+        "sprite":"assets/platform-collision.png",
+        "objtype":"platform"
+    },
+
+    "PT6":{
+        "posx":4,
+        "posy":6,
         "sprite":"assets/platform-collision.png",
         "objtype":"platform"
     }

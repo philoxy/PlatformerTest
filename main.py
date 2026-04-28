@@ -24,7 +24,7 @@ offsetX = 0
 global offsetY
 offsetY = 0
 move = 3
-gravity = 0.001
+gravity = 1
 global camerabounds
 camerabounds = 300
 global direction
@@ -53,6 +53,7 @@ class Player(pygame.sprite.Sprite):
 
 		self.image = pygame.image.load(image_path)
 		self.rect = self.image.get_rect(topleft=position)
+		self.mask = None
 	
 		self.pos = vec(position)
 		self.vel = vec(0,0)
@@ -124,21 +125,23 @@ class Player(pygame.sprite.Sprite):
 		elif direction == 1:
 			self.image = player
 
+		self.mask = pygame.mask.from_surface(self.surf)
+
 	def jump(self):
 		global jumps
 		global gravity
 		global hits
 
 		#hits = pygame.sprite.spritecollide(self, platforms, False)
-		if hits or self.vel.y == 0:
-			jumps = 2
-		if jumps > 0:
-			if jumps == 2:
-				self.vel.y = -(gravity*1.5)
-				jumps = 1
-			elif jumps == 1:
-				self.vel.y = -gravity
-				jumps = 0
+		#if hits or self.vel.y == 0:
+			#jumps = 2
+		#if jumps > 0:
+			#if jumps == 2:
+		self.vel.y = -(gravity*7)
+				#jumps = 1
+			#elif jumps == 1:
+				#self.vel.y = -(gravity*2)
+				#jumps = 0
 
 class Platform(pygame.sprite.Sprite):
 	def __init__(self, image_path, position):
@@ -156,6 +159,7 @@ class Platform(pygame.sprite.Sprite):
 		global hits
 		global saved_x
 		global saved_y
+		global direction
 		saved_x = P1.pos.x
 		saved_y = P1.pos.y
 		#self.pos.x += offsetX
@@ -164,8 +168,13 @@ class Platform(pygame.sprite.Sprite):
 
 		#self.rect.midbottom = self.pos
 		self.rect.midbottom = (self.pos.x + offsetX, self.pos.y)
+		self.mask = pygame.mask.from_surface(self.surf)
 
 		if self.rect.colliderect(P1.rect):
+				#if hits:
+					#if self.pos.y + 32 <= platforms.pos.y and platforms.pos.x + 64 > self.pos.x > platforms.pos.x - 32:
+						#self.pos.y = hits[0].rect.top + 1
+						#self.vel.y = 0
 
 			# Calculate overlap distances
 			dx_left = P1.rect.right - self.rect.left
@@ -176,25 +185,32 @@ class Platform(pygame.sprite.Sprite):
 			# Find smallest overlap (collision side)
 			min_overlap = min(dx_left, dx_right, dy_top, dy_bottom)
 
-			# Horizontal collisions
-			if min_overlap == dx_left:
-				P1.rect.right = self.rect.left
-				P1.pos.x = P1.rect.right
-
-			elif min_overlap == dx_right:
-				P1.rect.left = self.rect.right
-				P1.pos.x = P1.rect.left
+			#hits = False
 
 			# Vertical collisions
-			elif min_overlap == dy_top:
+			if P1.vel.y > 0 and min_overlap == dy_top:
 				P1.rect.bottom = self.rect.top
 				P1.pos.y = P1.rect.bottom
 				P1.vel.y = 0
+				hits = True
 
-			elif min_overlap == dy_bottom:
+			elif P1.vel.y < 0 and min_overlap == dy_bottom:
 				P1.rect.top = self.rect.bottom
-				P1.pos.y = P1.rect.top
+				P1.pos.y = P1.rect.top + 32
 				P1.vel.y = 0
+
+			# Horizontal collisions
+			if direction == 1 and min_overlap == dx_left:
+				P1.rect.right = self.rect.left
+				P1.pos.x = P1.rect.right
+				P1.pos.y = P1.rect.bottom
+				P1.vel.x = 0
+
+			elif direction == 0 and min_overlap == dx_right:
+				P1.rect.left = self.rect.right
+				P1.pos.x = P1.rect.left
+				P1.pos.y = P1.rect.bottom
+				P1.vel.x = 0
 
 class PlatformSprite(pygame.sprite.Sprite):
 	def __init__(self, image_path, position):
@@ -212,8 +228,6 @@ class PlatformSprite(pygame.sprite.Sprite):
 
 		#self.rect.midtop = self.pos
 		self.rect.midbottom = (self.pos.x+offsetX, self.pos.y)
-
-P1 = Player("assets/player.png", (300, 200))
 
 # making level objects
 
@@ -236,6 +250,7 @@ for i in range(len(level_content)):
 platforms = pygame.sprite.Group()
 platformSprites = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
+P1 = Player("assets/player.png", (300, 200))
 all_sprites.add(P1)
 
 for i in range(len(level_content)):
